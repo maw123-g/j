@@ -5,216 +5,189 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juego de la Felicidad</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Roboto', sans-serif;
-            background: url('nietzsche.png') no-repeat center center fixed;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('nietzsche.png');
             background-size: cover;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-position: center;
+            color: black;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            text-align: center;
+            margin: 20px auto;
+            width: 80%;
+            max-width: 400px;
         }
-
-        h1 {
-            font-size: 2.5em;
-            color: #6200ea;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        #game {
-            background: rgba(255, 255, 255, 0.8); /* Fondo semitransparente */
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
-        }
-
-        #question {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            color: #333;
-            font-weight: 500;
-        }
-
         button {
             background: #6200ea;
             color: white;
             border: none;
-            padding: 15px;
+            padding: 10px;
             width: 100%;
-            margin-top: 15px;
-            border-radius: 8px;
-            font-size: 1.2em;
-            transition: all 0.3s ease;
+            margin-top: 10px;
+            border-radius: 5px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: background 0.3s;
         }
-
         button:hover {
             background: #3700b3;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
         }
-
-        button:disabled {
-            background: #ddd;
-            cursor: not-allowed;
+        #score, #timer {
+            font-size: 20px;
+            margin-top: 10px;
         }
-
-        #score {
-            font-size: 1.5em;
-            color: #6200ea;
+        #ranking {
             margin-top: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            display: inline-block;
+            border-radius: 10px;
         }
-
-        #restart {
-            background: #03dac5;
-            margin-top: 20px;
-            border-radius: 8px;
-            padding: 12px 30px;
-            color: white;
-            font-size: 1.2em;
-            transition: background 0.3s ease;
-            cursor: pointer;
-        }
-
-        #restart:hover {
-            background: #018786;
-        }
-
         .hidden {
             display: none;
         }
-
-        /* Animación para la tarjeta */
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(50px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .card {
-            animation: fadeIn 0.8s ease-in-out;
+        #winner {
+            color: gold;
+            font-size: 24px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
+    <h1>Juego de la Felicidad</h1>
     <div id="game">
-        <h1>Juego de la Felicidad</h1>
         <div class="card">
             <h2 id="question">Cargando pregunta...</h2>
             <button onclick="answer(0)" id="btn0">Opción 1</button>
             <button onclick="answer(1)" id="btn1">Opción 2</button>
             <button onclick="answer(2)" id="btn2">Opción 3</button>
         </div>
-
-        <h2 id="score">Puntuación: 0</h2>
-        <button id="restart" class="hidden" onclick="restartGame()">Jugar de nuevo</button>
     </div>
 
-    <audio id="sound-click" src="https://www.fesliyanstudios.com/play-mp3/387"></audio>
-    <audio id="sound-end" src="https://www.fesliyanstudios.com/play-mp3/438"></audio>
-    <audio id="sound-restart" src="https://www.fesliyanstudios.com/play-mp3/439"></audio>
+    <h2 id="score">Puntuación: 0</h2>
+    <h3 id="timer">Tiempo: 10s</h3>
+    <button id="restart" class="hidden" onclick="restartGame()">Jugar de nuevo</button>
+
+    <div id="ranking">
+        <h3>Ranking de mejores puntajes</h3>
+        <ol id="ranking-list"></ol>
+        <p id="winner" class="hidden">🏆 ¡Eres el ganador! 🏆</p>
+    </div>
 
     <script>
-        const questions = [
-            { question: "¿Qué es la felicidad para ti?", options: [
-                { text: "Placer y disfrute", points: 10 },
-                { text: "Vivir con virtud y propósito", points: 20 },
-                { text: "Aceptar la vida como viene", points: 15 }
+        let questions = [
+            { question: "¿Qué filósofo decía que la felicidad es vivir conforme a la virtud?", options: [
+                { text: "Aristóteles", points: 20 },
+                { text: "Nietzsche", points: -5 },
+                { text: "Epicuro", points: 10 }
             ]},
-            { question: "¿Cómo crees que se alcanza la felicidad?", options: [
-                { text: "A través de los sentidos y el placer", points: 10 },
-                { text: "Mediante la autorrealización y la virtud", points: 20 },
-                { text: "Con el control de las emociones y la razón", points: 15 }
-            ]},
-            { question: "¿Qué te hace sentir más feliz?", options: [
-                { text: "Disfrutar del momento presente", points: 10 },
-                { text: "Cumplir mis metas y ser una mejor persona", points: 20 },
-                { text: "No depender de nada externo para ser feliz", points: 15 }
-            ]},
-            { question: "¿Cuál crees que es el mayor obstáculo para la felicidad?", options: [
-                { text: "El apego a lo material", points: 15 },
-                { text: "Las expectativas irreales", points: 20 },
-                { text: "No vivir el presente", points: 10 }
-            ]},
-            { question: "¿Cuál de estas filosofías sobre la felicidad te parece mejor?", options: [
-                { text: "El hedonismo", points: 10 },
-                { text: "El estoicismo", points: 20 },
-                { text: "El eudemonismo", points: 15 }
-            ]},
-            { question: "¿Qué te hace sentir en paz?", options: [
-                { text: "Lograr mis metas", points: 20 },
-                { text: "Tener estabilidad emocional", points: 15 },
+            { question: "Según el estoicismo, la clave de la felicidad es:", options: [
+                { text: "Buscar el placer", points: -10 },
+                { text: "Aceptar lo que no puedes cambiar", points: 20 },
                 { text: "Vivir sin preocupaciones", points: 10 }
             ]},
-            { question: "¿Cuál crees que es el papel de la sociedad en la felicidad?", options: [
-                { text: "Brindar oportunidades y bienestar", points: 15 },
-                { text: "Cada persona debe encontrar su propia felicidad", points: 20 },
-                { text: "Depende del contexto de cada persona", points: 10 }
+            { question: "¿Cuál es el objetivo del eudemonismo?", options: [
+                { text: "El placer inmediato", points: -10 },
+                { text: "La felicidad basada en la virtud", points: 20 },
+                { text: "Acumular riquezas", points: -5 }
             ]},
-            { question: "Si pudieras eliminar una emoción negativa, ¿cuál sería?", options: [
-                { text: "El miedo", points: 15 },
-                { text: "La ira", points: 20 },
-                { text: "La tristeza", points: 10 }
+            { question: "Para los epicúreos, la felicidad se basa en:", options: [
+                { text: "Evitar el dolor", points: 20 },
+                { text: "Acumular riquezas", points: -10 },
+                { text: "Seguir las reglas sociales", points: 5 }
             ]},
-            { question: "¿Cómo describirías tu estado actual de felicidad?", options: [
-                { text: "Muy feliz", points: 20 },
-                { text: "A veces feliz, a veces no", points: 15 },
-                { text: "En búsqueda de la felicidad", points: 10 }
+            { question: "¿Qué filósofo dijo 'Dios ha muerto'?", options: [
+                { text: "Nietzsche", points: 20 },
+                { text: "Sócrates", points: -5 },
+                { text: "Platón", points: -5 }
             ]},
-            { question: "¿Crees que la felicidad es un destino o un camino?", options: [
-                { text: "Es un destino que se alcanza", points: 10 },
-                { text: "Es un camino que se vive día a día", points: 20 },
-                { text: "Depende de cada persona", points: 15 }
+            { question: "¿Qué es la felicidad según Kant?", options: [
+                { text: "Cumplir el deber moral", points: 20 },
+                { text: "Buscar placer sin consecuencias", points: -10 },
+                { text: "No pensar en el futuro", points: 5 }
+            ]},
+            { question: "Para el utilitarismo, la felicidad es:", options: [
+                { text: "El mayor bienestar para la mayoría", points: 20 },
+                { text: "El beneficio personal", points: -10 },
+                { text: "Un ideal inalcanzable", points: -5 }
             ]}
         ];
 
         let currentQuestion = 0;
         let score = 0;
+        let timer;
+        let timeLeft = 10;
 
-        function playSound(id) {
-            let sound = document.getElementById(id);
-            sound.currentTime = 0;
-            sound.play();
+        function startTimer() {
+            timeLeft = 10;
+            document.getElementById("timer").textContent = `Tiempo: ${timeLeft}s`;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = `Tiempo: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    answer(-1);
+                }
+            }, 1000);
         }
 
         function loadQuestion() {
             if (currentQuestion < questions.length) {
+                startTimer();
                 const q = questions[currentQuestion];
                 document.getElementById("question").textContent = q.question;
                 document.getElementById("btn0").textContent = q.options[0].text;
                 document.getElementById("btn1").textContent = q.options[1].text;
                 document.getElementById("btn2").textContent = q.options[2].text;
-                document.getElementById("btn0").disabled = false;
-                document.getElementById("btn1").disabled = false;
-                document.getElementById("btn2").disabled = false;
             } else {
-                document.getElementById("game").innerHTML = "<h2>Juego terminado</h2>";
-                document.getElementById("restart").classList.remove("hidden");
-                playSound("sound-end");
+                endGame();
             }
         }
 
         function answer(index) {
-            if (currentQuestion < questions.length) {
+            if (index !== -1 && currentQuestion < questions.length) {
                 score += questions[currentQuestion].options[index].points;
-                document.getElementById("score").textContent = "Puntuación: " + score;
-                currentQuestion++;
-                playSound("sound-click");
-                setTimeout(loadQuestion, 500);
+                document.getElementById("score").textContent = `Puntuación: ${score}`;
             }
+            currentQuestion++;
+            clearInterval(timer);
+            setTimeout(loadQuestion, 500);
+        }
+
+        function endGame() {
+            document.getElementById("game").innerHTML = "<h2>Juego terminado</h2>";
+            document.getElementById("restart").classList.remove("hidden");
+
+            saveScore(score);
+            updateRanking();
+        }
+
+        function saveScore(newScore) {
+            let scores = JSON.parse(localStorage.getItem("ranking")) || [];
+            let playerName = prompt("Ingresa tu nombre:");
+            if (!playerName) playerName = "Anónimo";
+            
+            scores.push({ name: playerName, points: newScore });
+            scores.sort((a, b) => b.points - a.points);
+            scores = scores.slice(0, 5);
+
+            localStorage.setItem("ranking", JSON.stringify(scores));
+        }
+
+        function updateRanking() {
+            let rankingList = document.getElementById("ranking-list");
+            rankingList.innerHTML = "";
+            let scores = JSON.parse(localStorage.getItem("ranking")) || [];
+            scores.forEach(player => {
+                let listItem = document.createElement("li");
+                listItem.textContent = `${player.name}: ${player.points} puntos`;
+                rankingList.appendChild(listItem);
+            });
         }
 
         function restartGame() {
@@ -230,12 +203,12 @@
                 </div>
             `;
             document.getElementById("restart").classList.add("hidden");
-            playSound("sound-restart");
             loadQuestion();
         }
 
         window.onload = function() {
             loadQuestion();
+            updateRanking();
         };
     </script>
 
